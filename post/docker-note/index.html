@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Docker 笔记 | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="docker 安装
+# ALL linux
+curl https://get.docker.com/ | sh
+# Or
+wget -O - https://get.docker.com/ | sh
+####################..." />
+    <meta name="keywords" content="容器&虚拟化,Docker,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Docker 笔记</h2>
+            <div class="post-date">2023-08-09</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="docker-安装">docker 安装</h2>
+<pre><code class="language-bash"># ALL linux
+curl https://get.docker.com/ | sh
+# Or
+wget -O - https://get.docker.com/ | sh
+###########################################################
+
+### Ubuntu
+# step 1: 安装必要的一些系统工具
+sudo apt update
+sudo apt install -y ca-certificates curl gnupg lsb-release
+# 信任 Docker 的 GPG 公钥:
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+# 添加软件仓库:d
+echo \
+  &quot;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu \
+  $(lsb_release -cs) stable&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+# 最后安装
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+###########################################################
+
+### CentOS
+# step 1: 安装必要的一些系统工具
+yum install -y yum-utils device-mapper-persistent-data lvm2
+# Step 2: 添加软件源信息
+yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+# Step 3
+sed -i 's+download.docker.com+mirrors.aliyun.com/docker-ce+' /etc/yum.repos.d/docker-ce.repo
+# Step 4: 更新并安装Docker-CE
+yum makecache fast
+yum -y install docker-ce docker-ce-cli docker-compose-plugin
+# Step 4: 开启Docker服务
+systemctl enable docker
+systemctl start docker
+
+# 注意：
+# 官方软件源默认启用了最新的软件，您可以通过编辑软件源的方式获取各个版本的软件包。例如官方并没有将测试版本的软件源置为可用，您可以通过以下方式开启。同理可以开启各种测试版本等。
+# vim /etc/yum.repos.d/docker-ce.repo
+#   将[docker-ce-test]下方的enabled=0修改为enabled=1
+#
+# 安装指定版本的Docker-CE:
+# Step 1: 查找Docker-CE的版本:
+# yum list docker-ce.x86_64 --showduplicates | sort -r
+#   Loading mirror speeds from cached hostfile
+#   Loaded plugins: branch, fastestmirror, langpacks
+#   docker-ce.x86_64            17.03.1.ce-1.el7.centos            docker-ce-stable
+#   docker-ce.x86_64            17.03.1.ce-1.el7.centos            @docker-ce-stable
+#   docker-ce.x86_64            17.03.0.ce-1.el7.centos            docker-ce-stable
+#   Available Packages
+# Step2: 安装指定版本的Docker-CE: (VERSION例如上面的17.03.0.ce.1-1.el7.centos)
+# sudo yum -y install docker-ce-[VERSION]
+</code></pre>
+<h3 id="普通用户执行-docker-命令需要加入到-docker-用户组里">普通用户执行 docker 命令，需要加入到 docker 用户组里</h3>
+<pre><code class="language-bash">sudo groupadd docker
+sudo usermod -aG docker $USER
+sudo systemctl restart docker
+</code></pre>
+<h3 id="docker-常规配置">docker 常规配置</h3>
+<pre><code class="language-bash"># docker-compose
+sudo ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+# 更方便使用 docker exec 命令
+sudo tee /usr/local/bin/dssh &gt; /dev/null &lt;&lt; EOF
+#!/bin/sh
+docker exec -it \$1 sh
+EOF
+sudo chmod a+x /usr/local/bin/dssh
+</code></pre>
+<h3 id="设置镜像源">设置镜像源</h3>
+<pre><code class="language-bash">sudo tee /etc/docker/daemon.json &gt; /dev/null &lt;&lt; EOF
+{
+  &quot;registry-mirrors&quot;: [&quot;https://mirror.baidubce.com&quot;],
+  &quot;insecure-registries&quot;: [&quot;192.168.0.237:8008&quot;]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+</code></pre>
+<h2 id="docker-命令">docker 命令</h2>
+<h3 id="docker-pull-从镜像仓库中拉取或者更新指定镜像">docker pull 从镜像仓库中拉取或者更新指定镜像</h3>
+<ul>
+<li>-a: 拉取所有 tagged 镜像</li>
+<li>--disable-content-trust: 忽略镜像的校验,默认开启</li>
+</ul>
+<pre><code class="language-bash">docker pull centos:7
+</code></pre>
+<h3 id="docker-run-创建一个新的容器并运行一个命令">docker run 创建一个新的容器并运行一个命令</h3>
+<ul>
+<li>-a stdin: 指定标准输入输出内容类型，可选 STDIN/STDOUT/STDERR 三项</li>
+<li>-d: 后台运行容器，并返回容器ID</li>
+<li>-i: 以交互模式运行容器，通常与 -t 同时使用</li>
+<li>-P: 随机端口映射，容器内部端口随机映射到主机的端口</li>
+<li>-p: 指定端口映射，格式为：主机(宿主)端口:容器端口</li>
+<li>-t: 为容器重新分配一个伪输入终端，通常与 -i 同时使用</li>
+<li>--name=&quot;nginx-lb&quot;: 为容器指定一个名称</li>
+<li>--dns 8.8.8.8: 指定容器使用的DNS服务器，默认和宿主一致</li>
+<li>--dns-search example.com: 指定容器DNS搜索域名，默认和宿主一致</li>
+<li>-h &quot;mars&quot;: 指定容器的hostname</li>
+<li>-e username=&quot;ritchie&quot;: 设置环境变量</li>
+<li>--env-file=[]: 从指定文件读入环境变量</li>
+<li>--cpuset=&quot;0-2&quot; or --cpuset=&quot;0,1,2&quot;: 绑定容器到指定CPU运行</li>
+<li>-m :设置容器使用内存最大值；</li>
+<li>--net=&quot;bridge&quot;: 指定容器的网络连接类型，支持 bridge/host/none/container: 四种类型</li>
+<li>--link=[]: 添加链接到另一个容器</li>
+<li>--expose=[]: 开放一个端口或一组端口</li>
+<li>--volume , -v: 绑定一个卷</li>
+</ul>
+<pre><code class="language-bash">docker run --rm -it centos:7 /bin/bash
+
+docker run -d --name mytomcat -p8080:8080 -v C:\source\mycode\Docker:/usr/local/tomcat/webapps tomcat
+</code></pre>
+<h3 id="docker-ps-列出容器">docker ps 列出容器</h3>
+<ul>
+<li>-a: 显示所有的容器，包括未运行的</li>
+<li>-f: 根据条件过滤显示的内容</li>
+<li>--format: 指定返回值的模板文件</li>
+<li>-l: 显示最近创建的容器</li>
+<li>-n: 列出最近创建的n个容器</li>
+<li>--no-trunc: 不截断输出</li>
+<li>-q: 静默模式，只显示容器编号</li>
+<li>-s: 显示总的文件大小</li>
+</ul>
+<pre><code class="language-bash">docker ps
+</code></pre>
+<h3 id="docker-start-启动一个或多个已经被停止的容器">docker start 启动一个或多个已经被停止的容器</h3>
+<h3 id="docker-stop-停止一个运行中的容器">docker stop 停止一个运行中的容器</h3>
+<h3 id="docker-restart-重启容器">docker restart 重启容器</h3>
+<pre><code class="language-bash">docker start mynignx
+docker stop mynignx
+docker restart mynignx
+</code></pre>
+<h3 id="docker-rm-删除一个或多个容器">docker rm 删除一个或多个容器</h3>
+<ul>
+<li>-f: 通过 SIGKILL 信号强制删除一个运行中的容器</li>
+<li>-l: 移除容器间的网络连接，而非容器本身</li>
+<li>-v: 删除与容器关联的卷</li>
+</ul>
+<pre><code class="language-bash">docker rm mynignx
+# 删除所有已经停止的容器
+docker rm $(docker ps -a -q)
+</code></pre>
+<h3 id="docker-exec-在运行的容器中执行命令">docker exec 在运行的容器中执行命令</h3>
+<ul>
+<li>-d :分离模式: 在后台运行</li>
+<li>-i :即使没有附加也保持 STDIN 打开</li>
+<li>-t :分配一个伪终端</li>
+</ul>
+<pre><code class="language-bash">docker exec -it mytomcat /bin/bash
+</code></pre>
+<h3 id="docker-inspect-获取容器镜像的元数据">docker inspect 获取容器/镜像的元数据</h3>
+<ul>
+<li>-f 指定返回值的模板文件。</li>
+<li>-s 显示总的文件大小。</li>
+<li>--type 为指定类型返回JSON。</li>
+</ul>
+<pre><code class="language-bash">docker inspect [OPTIONS] NAME|ID [NAME|ID...]
+</code></pre>
+<h3 id="显示-docker-占用情况">显示 Docker 占用情况</h3>
+<pre><code class="language-bash">docker system df
+</code></pre>
+<h3 id="进行自动空间清理">进行自动空间清理</h3>
+<pre><code class="language-bash">docker system prune
+</code></pre>
+<h3 id="删除悬空镜像无名称镜像">删除悬空镜像（无名称镜像）</h3>
+<pre><code class="language-bash">docker rmi $(docker images -f &quot;dangling=true&quot; -q)
+
+docker image prune
+</code></pre>
+<h3 id="删除所有未使用的镜像">删除所有未使用的镜像</h3>
+<pre><code class="language-bash">docker image prune -a -f
+</code></pre>
+<h3 id="删除所有未使用的-volume">删除所有未使用的 Volume</h3>
+<pre><code class="language-bash">docker volume rm $(docker volume ls -qf dangling=true)
+</code></pre>
+<h3 id="清理-docker-build-缓存">清理 docker build 缓存</h3>
+<pre><code class="language-bash">docker builder prune -af
+</code></pre>
+<h3 id="清理所有容器日志信息">清理所有容器日志信息</h3>
+<pre><code class="language-bash">truncate -s 0 /var/lib/docker/containers/**/*-json.log
+</code></pre>
+<h3 id="停止所有容器">停止所有容器</h3>
+<pre><code class="language-bash">docker stop $(docker ps -a -q)
+</code></pre>
+<h3 id="删除所有容器">删除所有容器</h3>
+<pre><code class="language-bash">docker rm $(docker ps -a -q)
+</code></pre>
+<h3 id="docker-save-保存本地镜像">docker save 保存本地镜像</h3>
+<pre><code class="language-bash">docker save -o nginx.tar nginx:latest
+docker save &gt; nginx.tar nginx:latest
+</code></pre>
+<h3 id="docker-load-加载本地镜像">docker load 加载本地镜像</h3>
+<pre><code class="language-bash">docker load -i nginx.tar
+docker load &lt; nginx.tar
+</code></pre>
+<h3 id="本地压缩镜像的保存与加载">本地压缩镜像的保存与加载</h3>
+<pre><code>docker save nginx:latest | gzip &gt; nginx.tar.gz
+gunzip -c nginx.tar.gz | docker load
+</code></pre>
+<h3 id="替换国内源">替换国内源</h3>
+<pre><code class="language-dockerfile">RUN sed -i 's#archive.ubuntu.com#mirrors.aliyun.com#g' /etc/apt/sources.list
+</code></pre>
+<h2 id="dockerfile">Dockerfile</h2>
+<pre><code class="language-dockerfile">FROM kalilinux/kali-rolling
+
+MAINTAINER cainiao &lt;565499699@qq.com&gt;
+
+RUN sed -i &quot;s#http://http.kali.org/kali#http://mirrors.aliyun.com/kali#g&quot; /etc/apt/sources.list
+RUN apt update &amp;&amp; \
+    apt full-upgrade -y &amp;&amp; \
+    apt install -y nmap &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT [&quot;/usr/bin/nmap&quot;]
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://cainiao1992.github.io/post-images/1691560446221.png" alt="Dockerfile-cmd" loading="lazy"></figure>
+<h2 id="docker-build">docker build</h2>
+<pre><code class="language-bash"># --tag, -t: 镜像的名字及标签，通常 name:tag 或者 name 格式；可以在一次构建中为一个镜像设置多个标签。
+# -f :指定要使用的 Dockerfile 文件
+# --no-cache : 构建映像时不使用缓存
+docker build -t name1/name2:tag -f Dockerfile .
+</code></pre>
+<h2 id="docker-compose">docker-compose</h2>
+<pre><code class="language-bash"># 启动 （-d: 后台运行，-f: 指定yml文件，不写为默认 docker-compose.yml 文件）
+docker-compose up -d
+# 停止
+docker-compose stop
+# 删除
+docker-compose rm
+# 停止并删除
+docker-compose down
+# 启动指定 XXX.yml 并且后台运行的容器
+docker-compose -f XXX.yml up -d
+</code></pre>
+<h2 id="docker-login-登录-下载私有镜像或-push-镜像">docker login 登录 （下载私有镜像或 push 镜像）</h2>
+<pre><code class="language-bash">docker login 192.168.0.237:8008
+</code></pre>
+<h2 id="docker-tag-改标签">docker tag 改标签</h2>
+<pre><code class="language-bash">docker tag af8f9e52dbba 192.168.0.237:8008/openmetadata/db:0.12.0
+</code></pre>
+<h3 id="docker-设置代理">Docker 设置代理</h3>
+<pre><code class="language-bash">sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf &gt; /dev/null &lt;&lt; EOF
+[Service]
+Environment=&quot;HTTP_PROXY=http://172.16.253.1:8888&quot;
+Environment=&quot;HTTPS_PROXY=https://172.16.253.1:8888&quot;
+Environment=&quot;NO_PROXY=localhost,127.0.0.1&quot;
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+sudo systemctl show --property=Environment docker
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/PJJzyLy1N/" class="tag">
+                    容器&amp;虚拟化
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/yPbchiAoj/" class="tag">
+                    Docker
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

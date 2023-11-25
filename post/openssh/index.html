@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>OpenSSH 笔记 | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="配置免密登录
+# 创建SSH密钥对。
+ssh-keygen -t rsa -b 4096
+
+# 获取SSH公钥。
+cat ~/.ssh/id_rsa.pub
+
+# 配置免密登录的服务器主机。
+ssh-copy-id root@uing.vi..." />
+    <meta name="keywords" content="Linux,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">OpenSSH 笔记</h2>
+            <div class="post-date">2023-09-01</div>
+            
+            <div class="post-content" v-pre>
+              <p>配置免密登录</p>
+<pre><code class="language-shell"># 创建SSH密钥对。
+ssh-keygen -t rsa -b 4096
+
+# 获取SSH公钥。
+cat ~/.ssh/id_rsa.pub
+
+# 配置免密登录的服务器主机。
+ssh-copy-id root@uing.vip
+``
+
+配置 root 用户登录
+``` shell
+vi /etc/ssh/sshd_config
+# root 用户登录
+# prohibit-password / without-password:禁止密码登录 root
+# yes: 允许使用密码登录 root
+# no: 禁止登录 root
+# PermitRootLogin yes
+# 能否使用密码登录SSH (包括其它用户)
+# PasswordAuthentication no
+
+echo &quot;PermitRootLogin yes&quot; | sudo tee /etc/ssh/sshd_config
+systemctl restart sshd
+</code></pre>
+<p>解除（清除）信任主机公钥</p>
+<pre><code class="language-shell">ssh-keygen -R uing.vip
+</code></pre>
+<h1 id="ssh-跳板机连接方法">SSH 跳板机连接方法</h1>
+<pre><code class="language-bash">ssh username@目标机器IP -p 22 -J username@跳板机IP:22
+</code></pre>
+<p>产生64bit随机数</p>
+<pre><code class="language-bash">openssl rand -base64 64
+</code></pre>
+<hr>
+<h3 id="遇到的问题">遇到的问题</h3>
+<p>使用过时的密钥算法</p>
+<pre><code>Unable to negotiate with 192.168.2.21 port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss
+</code></pre>
+<p>解决</p>
+<pre><code class="language-shell"># 增加 -oHostKeyAlgorithms=+ssh-dss 选项
+ssh -oHostKeyAlgorithms=+ssh-dss root@192.168.2.21
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/Kpxd16d2I/" class="tag">
+                    Linux
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://cainiao1992.github.io/post/caddy2/">
+                  <h3 class="post-title">
+                    Caddy2 - 能够自动申请证书的 HTTPS/HTTP 服务器
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

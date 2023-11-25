@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Gitea - 代码项目管理 | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Gitea 安装部署
+配置 SSH 直通（可选，不需要 SSH 协议同步无需此步骤，可以使用 https/http 协议同步代替）
+# 记录下 UID/GID 替换中的 USER_UID USER_GID
+sudo adduser --sy..." />
+    <meta name="keywords" content="Docker,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Gitea - 代码项目管理</h2>
+            <div class="post-date">2023-08-27</div>
+            
+            <div class="post-content" v-pre>
+              <h1 id="gitea-安装部署">Gitea 安装部署</h1>
+<h2 id="配置-ssh-直通可选不需要-ssh-协议同步无需此步骤可以使用-httpshttp-协议同步代替">配置 SSH 直通（可选，不需要 SSH 协议同步无需此步骤，可以使用 https/http 协议同步代替）</h2>
+<pre><code class="language-bash"># 记录下 UID/GID 替换中的 USER_UID USER_GID
+sudo adduser --system --shell /bin/bash --gecos 'Git Version Control' --group --disabled-password --home /home/git git
+# 生成 SSH 密钥对
+sudo -u git ssh-keygen -t rsa -b 4096 -C &quot;Gitea Host Key&quot;
+
+# ----------------------------------------------------------------
+
+sudo -u git cat /home/git/.ssh/id_rsa.pub | sudo -u git tee -a /home/git/.ssh/authorized_keys
+sudo -u git chmod 600 /home/git/.ssh/authorized_keys
+
+cat &lt;&lt;&quot;EOF&quot; | sudo tee /usr/local/bin/gitea
+#!/bin/sh
+ssh -p 2222 -o StrictHostKeyChecking=no git@127.0.0.1 &quot;SSH_ORIGINAL_COMMAND=\&quot;$SSH_ORIGINAL_COMMAND\&quot; $0 $@&quot;
+EOF
+sudo chmod +x /usr/local/bin/gitea
+</code></pre>
+<h2 id="docker-compose-安装部署">docker-compose 安装部署</h2>
+<ul>
+<li>docker-compose.yml</li>
+</ul>
+<pre><code class="language-yaml">version: &quot;3&quot;
+
+services:
+  caddy:
+    container_name: caddy
+    image: caddy:alpine
+    restart: unless-stopped
+    ports:
+      - &quot;80:80&quot;
+      - &quot;80:80/udp&quot;
+      - &quot;443:443&quot;
+      - &quot;443:443/udp&quot;
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+  gitea:
+    container_name: gitea
+    image: gitea/gitea:latest
+    restart: unless-stopped
+    # depends_on:
+    #   - redis
+    environment:
+      - USER=git
+      - USER_UID=111
+      - USER_GID=122
+    volumes:
+      - ./gitea:/data
+      - /home/git/.ssh:/data/git/.ssh
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - &quot;127.0.0.1:2222:22&quot;
+
+
+  # redis:
+  #   container_name: redis
+  #   image: redis:alpine
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./redis:/data
+</code></pre>
+<ul>
+<li>Caddyfile</li>
+</ul>
+<pre><code class="language-Caddyfile">:80 {
+  redir https://{host}{uri}
+}
+gitea.uing.vip {
+  log {
+    output stdout
+    format console
+    level  ERROR
+  }
+  reverse_proxy gitea:3000
+}
+</code></pre>
+<h2 id="启用-gitea-actions-内置的-cicd-持续集成-持续交付和持续部署解决方案">启用 Gitea Actions 内置的 CI/CD （持续集成、持续交付和持续部署）解决方案</h2>
+<h3 id="配置-gitea-服务器">配置 Gitea 服务器</h3>
+<pre><code class="language-bash">cat &lt;&lt; EOF &gt;&gt; gitea/gitea/conf/app.ini
+[actions]
+ENABLED=true
+EOF
+docker-compose restart gitea
+</code></pre>
+<h3 id="生成-gitea-runner-配置文件">生成  Gitea Runner 配置文件</h3>
+<pre><code>mkdir gitea_runner &amp;&amp; cd gitea_runner
+docker run --entrypoint=&quot;&quot; --rm -it gitea/act_runner:latest act_runner generate-config &gt; config.yaml
+</code></pre>
+<h3 id="docker-compose-安装-gitea-runner-部署">docker-compose 安装 Gitea Runner 部署</h3>
+<ul>
+<li>docker-compose.yml</li>
+</ul>
+<pre><code class="language-yaml">version: &quot;3&quot;
+
+services:
+  gitea_runner:
+    container_name: gitea_runner
+    image: gitea/act_runner:latest
+    # 如果使用服务器容器名称作为 URL HOST 的话，需要先启动 Gitea
+    depends_on:
+      - gitea
+    environment:
+      CONFIG_FILE: /config.yaml
+      # Gitea 服务器地址（也可以是内网地址或者容器内部地址）
+      GITEA_INSTANCE_URL: https://gitea.uing.vip
+      # 获取地址 https://gitea.uing.vip/admin/actions/runners/
+      GITEA_RUNNER_REGISTRATION_TOKEN: &quot;&quot;
+      # Runner名称（可选）。如果留空，将使用主机名
+      GITEA_RUNNER_NAME: &quot;&quot;
+      GITEA_RUNNER_LABELS: &quot;&quot;
+    volumes:
+      - ./gitea_runner/config.yaml:/config.yaml
+      - ./gitea_runner/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+</code></pre>
+<h2 id="配置仓库启用-gitea-actions">配置仓库启用 Gitea Actions</h2>
+<ol>
+<li>打开仓库设置 https://gitea.uing.vip/&lt;owner&gt;/&lt;repo&gt;/settings</li>
+<li>找到并勾选 <strong>启用 Actions</strong> ，并 <strong>更新仓库设置</strong> 保存设置<br>
+<img src="https://cainiao1992.github.io/post-images/1693367900388.png" alt="enable_actions" loading="lazy"></li>
+<li>在仓库代码下新建目录 <strong>.gitea/workflows/</strong>，新建 Yaml 文件编写 Gitea Actions 执行代码</li>
+</ol>
+<pre><code class="language-bash">git clone git@gitea.uing.vip:cainiao/gitea_runner.git
+
+cd gitea_runner &amp;&amp; mkdir -p .gitea/workflows/
+
+cat &lt;&lt;&quot;EOF&quot; &gt; .gitea/workflows/demo.yaml
+name: Gitea Actions Demo
+run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
+on: [push]
+
+jobs:
+  Explore-Gitea-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo &quot;🎉 The job was automatically triggered by a ${{ gitea.event_name }} event.&quot;
+      - run: echo &quot;🐧 This job is now running on a ${{ runner.os }} server hosted by Gitea!&quot;
+      - run: echo &quot;🔎 The name of your branch is ${{ gitea.ref }} and your repository is ${{ gitea.repository }}.&quot;
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: echo &quot;💡 The ${{ gitea.repository }} repository has been cloned to the runner.&quot;
+      - run: echo &quot;🖥️ The workflow is now ready to test your code on the runner.&quot;
+      - name: List files in the repository
+        run: |
+          ls ${{ gitea.workspace }}
+      - run: echo &quot;🍏 This job's status is ${{ job.status }}.&quot;
+EOF
+
+git add .gitea/workflows/demo.yaml
+git commit -m &quot;add .gitea/workflows/demo.yaml&quot;
+git push
+</code></pre>
+<ol start="4">
+<li>在仓库的 Actions 下查看到执行过程及结果：https://gitea.uing.vip/&lt;owner&gt;/&lt;repo&gt;/actions</li>
+</ol>
+<h2 id="相关连接">相关连接</h2>
+<ul>
+<li>(Configuration Cheat Sheet)[https://docs.gitea.com/administration/config-cheat-sheet]</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/yPbchiAoj/" class="tag">
+                    Docker
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://cainiao1992.github.io/post/git/">
+                  <h3 class="post-title">
+                    Git 使用笔记
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

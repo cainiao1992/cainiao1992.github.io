@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Caddy2 - 能够自动申请证书的 HTTPS/HTTP 服务器 | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="自动HTTPS
+当符合下面一些合理的标准时，Caddy会自动为所有站点启用HTTPS:
+
+主机名
+
+不为空
+不是localhost
+不是一个IP地址
+不超过一个通配符（*）
+通配符必须是最左边的标签
+
+
+没有显式指定端口为80
+没有显式指定..." />
+    <meta name="keywords" content="Web,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Caddy2 - 能够自动申请证书的 HTTPS/HTTP 服务器</h2>
+            <div class="post-date">2023-08-29</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="自动https">自动HTTPS</h2>
+<p>当符合下面一些合理的标准时，Caddy会自动为所有站点启用HTTPS:</p>
+<ul>
+<li>主机名
+<ul>
+<li>不为空</li>
+<li>不是localhost</li>
+<li>不是一个IP地址</li>
+<li>不超过一个通配符（*）</li>
+<li>通配符必须是最左边的标签</li>
+</ul>
+</li>
+<li>没有显式指定端口为80</li>
+<li>没有显式指定使用http协议</li>
+<li>TLS没有在站点的定义中被关闭</li>
+<li>不是你自己提供的证书和密钥</li>
+<li>Caddy能够绑定到端口80和443（除非使用DNS验证）</li>
+</ul>
+<p>Caddy还会将所有HTTP请求重定向到与HTTPS对应的地址，只要Caddyfile中没有定义主机名的纯文本变体。</p>
+<hr>
+<h2 id="安装部署">安装部署</h2>
+<ul>
+<li>docker-compose.yml</li>
+</ul>
+<pre><code class="language-yaml">version: &quot;3&quot;
+
+services:
+  caddy:
+    container_name: caddy
+    image: caddy:alpine
+    restart: unless-stopped
+    ports:
+      - &quot;80:80&quot;
+      - &quot;80:80/udp&quot;
+      - &quot;443:443&quot;
+      - &quot;443:443/udp&quot;
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/:/data/caddy/
+</code></pre>
+<ul>
+<li>Caddyfile</li>
+</ul>
+<pre><code class="language-Caddyfile">:80 {
+  redir https://{host}{uri}
+}
+
+uing.vip {
+  log {
+    output stdout
+    format console
+    level  ERROR
+  }
+  root * /var/www/uing.vip
+  handle_errors {
+    rewrite * /404.html
+    file_server
+  }
+  file_server
+}
+
+gitea.uing.vip {
+  log {
+    output stdout
+    format console
+    level  ERROR
+  }
+  reverse_proxy gitea:3000
+}
+</code></pre>
+<h2 id="如果需要接入-cloudflare-cdn-上">如果需要接入 Cloudflare CDN 上</h2>
+<ol>
+<li>打开 https://dash.cloudflare.com/ 注册登录</li>
+<li>添加网站，更改域名的 DNS</li>
+<li>打开 https://dash.cloudflare.com/profile/api-tokens</li>
+<li>API 令牌 -&gt; 创建 API 令牌 -&gt; 编辑区域 DNS -&gt; 选择模板 -&gt; 区域资源 -&gt; 对应网站</li>
+<li>获取到的API KEY -&gt; docker-compose.yml -&gt; caddy 容器 -&gt; 替换 CF_API_TOKEN 环境变量 -&gt; 替换 DOMAIN 环境变量（也可以是二级或三级域名）</li>
+<li>https://dash.cloudflare.com -&gt; 对应网站</li>
+<li>SSL/TLS -&gt; 源服务器 -&gt; 源证书 -&gt;  经过身份验证的源服务器拉取 -&gt; 打开</li>
+<li>SSL/TLS -&gt; 概述 -&gt; 您的 SSL/TLS 加密模式为 -&gt; 完全（严格）</li>
+</ol>
+<ul>
+<li>docker-compose.yml</li>
+</ul>
+<pre><code class="language-yaml">version: &quot;3&quot;
+services:
+  caddy:
+    container_name: caddy
+    build: 
+      dockerfile: ./caddy-cloudflare-Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - sing-box
+      # - subconverter
+    ports:
+      - &quot;80:80&quot;
+      - &quot;80:80/udp&quot;
+      - &quot;443:443&quot;
+      - &quot;443:443/udp&quot;
+    environment:
+      - CF_API_TOKEN=XXX
+      - DOMAIN=XXX
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy:/data/caddy
+</code></pre>
+<ul>
+<li>Caddyfile</li>
+</ul>
+<pre><code class="language-Caddyfile">{env.DOMAIN} {
+  log {
+    output stdout
+    format console
+    level  ERROR
+  }
+  reverse_proxy gitea:3000
+}
+</code></pre>
+<ul>
+<li>caddy-cloudflare-Dockerfile</li>
+</ul>
+<pre><code class="language-Dockerfile">FROM caddy:builder-alpine AS builder
+RUN xcaddy build --with github.com/caddy-dns/cloudflare
+
+FROM caddy:alpine
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+</code></pre>
+<h2 id="相关连接">相关连接</h2>
+<ul>
+<li><a href="https://caddyserver.com/docs">Caddy Docs</a></li>
+<li><a href="https://caddy2.dengxiaolong.com/docs/">Caddy v2中文文档</a></li>
+<li><a href="https://dengxiaolong.com/caddy/zh/">Caddy中文文档(V1)</a></li>
+<li><a href="https://github.com/caddy-dns/cloudflare">Cloudflare module for Caddy</a></li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/ojsNZEGoM/" class="tag">
+                    Web
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://cainiao1992.github.io/post/harbor/">
+                  <h3 class="post-title">
+                    Harbor - 私有化容器仓库
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

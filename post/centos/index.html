@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>CentOS | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="CentOS 7 网络配置
+# 网络配置
+sed -i 's/ONBOOT=&quot;no&quot;/ONBOOT=&quot;yes&quot;/g' /etc/sysconfig/network-scripts/ifcfg-eth0..." />
+    <meta name="keywords" content="Linux,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">CentOS</h2>
+            <div class="post-date">2023-08-17</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="centos-7-网络配置">CentOS 7 网络配置</h2>
+<pre><code class="language-shell"># 网络配置
+sed -i 's/ONBOOT=&quot;no&quot;/ONBOOT=&quot;yes&quot;/g' /etc/sysconfig/network-scripts/ifcfg-eth0
+sed -i 's/IPV6INIT=&quot;yes&quot;/IPV6INIT=&quot;no&quot;/g' /etc/sysconfig/network-scripts/ifcfg-eth0
+sed -i 's/BOOTPROTO=&quot;dhcp&quot;/BOOTPROTO=&quot;none&quot;/g' /etc/sysconfig/network-scripts/ifcfg-eth0
+
+sed -i 's/ONBOOT=no/ONBOOT=yes/g' /etc/sysconfig/network-scripts/ifcfg-eth0
+sed -i 's/IPV6INIT=yes/IPV6INIT=no/g' /etc/sysconfig/network-scripts/ifcfg-eth0
+sed -i 's/BOOTPROTO=dhcp/BOOTPROTO=none/g' /etc/sysconfig/network-scripts/ifcfg-eth0
+
+cat &lt;&lt; EOF &gt;&gt; /etc/sysconfig/network-scripts/ifcfg-eth0
+IPADDR=192.168.2.23
+PREFIX=16
+GATEWAY=192.168.1.1
+DNS1=114.114.114.114
+DNS2=192.168.1.1
+EOF
+cat &lt;&lt; EOF &gt;/etc/hostname
+QRadarCE
+EOF
+</code></pre>
+<h2 id="centos-7-安装必备包">CentOS 7 安装必备包</h2>
+<pre><code class="language-shell"># 必备软件
+yum install -y epel-release
+yum update -y
+yum install -y bash-completion bash-completion-extras sudo openssh-server
+systemctl enable sshd
+systemctl start sshd
+ln -s -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+reboot
+</code></pre>
+<h2 id="centos-6-安装必备包">CentOS 6 安装必备包</h2>
+<pre><code class="language-shell">mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-vault-6.10.repo
+yum clean all &amp;&amp; yum makecache
+yum install -y epel-release
+yum update -y
+yum install -y bash-completion bash-completion-extras sudo openssh-server
+echo &quot;PermitRootLogin yes&quot; | tee /etc/ssh/sshd_config
+
+ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key
+ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
+
+chkconfig sshd on
+service sshd start
+ln -s -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+</code></pre>
+<h2 id="extra-packages-for-enterprise-linux-epel">Extra Packages for Enterprise Linux (EPEL)</h2>
+<pre><code class="language-shell">yum install -y epel-release
+</code></pre>
+<h2 id="elrepo-project">ELRepo Project</h2>
+<p>Import the public key:</p>
+<pre><code class="language-shell">rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+</code></pre>
+<p>To install ELRepo for RHEL-9:</p>
+<pre><code class="language-bash">yum install https://www.elrepo.org/elrepo-release-9.el9.elrepo.noarch.rpm
+</code></pre>
+<p>To install ELRepo for RHEL-8:</p>
+<pre><code class="language-shell">yum install https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm
+</code></pre>
+<p>To install ELRepo for RHEL-7, SL-7 or CentOS-7:</p>
+<pre><code class="language-shell">yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+</code></pre>
+<p>安装长期支持内核（lt = long time）</p>
+<pre><code class="language-shell">yum --enablerepo=elrepo-kernel -y install kernel-lt
+</code></pre>
+<p>安装稳定主线内核kernel-ml（ml=mainline）</p>
+<pre><code class="language-shell">yum --enablerepo=elrepo-kernel -y install kernel-ml
+</code></pre>
+<h3 id="红帽软件集合">红帽软件集合</h3>
+<p>https://access.redhat.com/support/policy/updates/rhscl-rhel7</p>
+<pre><code class="language-shell">yum install centos-release-scl –y
+</code></pre>
+<p>安装 GCC 9</p>
+<pre><code class="language-shell">yum install devtoolset-9-toolchain –y
+# 临时使用
+scl enable devtoolset-9 bash
+source scl_source enable devtoolset-9
+
+安装 GCC 7
+```shell
+yum install devtoolset-7-toolchain –y
+# 临时使用
+scl enable devtoolset-7 bash
+source scl_source enable devtoolset-7
+</code></pre>
+<p>安装 Python 3.8</p>
+<pre><code class="language-shell">yum install rh-python38 rh-python38-python-devel –y
+# 临时使用
+scl enable rh-python38 bash
+source scl_source enable rh-python38
+</code></pre>
+<h2 id="mysql-server-57">MySQL Server 5.7</h2>
+<pre><code class="language-shell">yum install -y http://repo.mysql.com/mysql57-community-release-el7.rpm
+rpm -import http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+
+yum install mysql-server -y
+
+systemctl enable mysqld
+systemctl start mysqld
+
+grep 'temporary password'  /var/log/mysqld.log
+</code></pre>
+<h2 id="mysql-server-80">MySQL Server 8.0</h2>
+<pre><code class="language-shell">yum install -y https://repo.mysql.com/mysql80-community-release-el7.rpm
+rpm -import http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+
+yum install mysql-server -y
+
+systemctl enable mysqld
+systemctl start mysqld
+
+grep 'temporary password'  /var/log/mysqld.log
+</code></pre>
+<h2 id="nginx">Nginx</h2>
+<pre><code class="language-shell">yum install -y https://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+yum install -y nginx
+systemctl enable nginx
+systemctl start nginx
+</code></pre>
+<h2 id="redis-32">Redis 3.2</h2>
+<pre><code class="language-shell">yum install -y redis
+systemctl enable redis
+systemctl start redis
+</code></pre>
+<h2 id="redis-6">Redis 6</h2>
+<pre><code class="language-shell">yum install -y \
+https://repo.ius.io/ius-release-el7.rpm \
+https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install -y redis6
+systemctl enable redis
+systemctl start redis
+</code></pre>
+<h2 id="openjdk">OpenJDK</h2>
+<pre><code class="language-shell"># openjdk 8
+yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel
+
+# openjdk 11
+yum install -y java-11-openjdk java-11-openjdk-devel
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/Kpxd16d2I/" class="tag">
+                    Linux
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://cainiao1992.github.io/post/uninstall-cloud-server-monitor/">
+                  <h3 class="post-title">
+                    卸载云服务监控
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

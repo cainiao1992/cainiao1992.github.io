@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>初始化 VPS | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Ubuntu
+基础操作
+客户端
+# 配置免密登录
+ssh-copy-id root@uing.vip
+
+服务器
+apt update &amp;&amp; apt -o Dpkg::Options::=&quot;--force-confn..." />
+    <meta name="keywords" content="Linux,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">初始化 VPS</h2>
+            <div class="post-date">2023-08-17</div>
+            
+            <div class="post-content" v-pre>
+              <h1 id="ubuntu">Ubuntu</h1>
+<h2 id="基础操作">基础操作</h2>
+<h3 id="客户端">客户端</h3>
+<pre><code class="language-bash"># 配置免密登录
+ssh-copy-id root@uing.vip
+</code></pre>
+<h3 id="服务器">服务器</h3>
+<pre><code class="language-bash">apt update &amp;&amp; apt -o Dpkg::Options::=&quot;--force-confnew&quot; full-upgrade -y &amp;&amp; apt autoremove -y
+apt install -y curl htop vim ufw sudo bash-completion
+
+cat &gt;&gt; /etc/security/limits.conf &lt;&lt; EOF
+# End of file
+*     soft   nofile    655360
+*     hard   nofile    655360
+*     soft   nproc     655360
+*     hard   nproc     655360
+*     soft   core      655360
+*     hard   core      655360
+*     hard   memlock   unlimited
+*     soft   memlock   unlimited
+EOF
+
+cat &gt;&gt; /etc/sysctl.conf &lt;&lt; EOF
+net.core.rmem_max=33554432
+net.core.wmem_max=33554432
+net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbr
+EOF
+sysctl -p
+
+cat &gt; /etc/hostname &lt;&lt; EOF
+uing.vip
+EOF
+cat &gt;&gt; /etc/hosts &lt;&lt; EOF
+127.0.1.1 uing.vip
+EOF
+
+# 设置上海时区
+ln -s -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+timedatectl set-timezone Asia/Shanghai
+
+# 防火墙配置
+ufw default deny
+ufw allow ssh
+ufw allow http
+ufw allow https
+ufw allow 443/udp
+ufw enable
+
+# 重启
+reboot
+
+# Certbot HTTPS 证书安装续订
+apt install -y certbot
+certbot certonly --standalone --agree-tos --register-unsafely-without-email -d uing.vip
+</code></pre>
+<h2 id="安装-docker">安装 Docker</h2>
+<pre><code class="language-bash">curl https://get.docker.com/ | sh
+ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+# 更方便使用 docker exec 命令
+sudo tee /usr/local/bin/dssh &gt; /dev/null &lt;&lt; EOF
+#!/bin/sh
+docker exec -it \$1 sh
+EOF
+sudo chmod a+x /usr/local/bin/dssh
+
+# 让 Docker 支持 IPv6
+sudo tee /etc/docker/daemon.json &gt; /dev/null &lt;&lt; EOF
+{
+  &quot;ipv6&quot;: true,
+  &quot;fixed-cidr-v6&quot;: &quot;2001:db8:1::/64&quot;,
+  &quot;experimental&quot;: true,
+  &quot;ip6tables&quot;: true
+}
+EOF
+sudo systemctl restart docker
+
+# 创建 Docker VPS 容器网络
+docker network create \
+  --driver=bridge \
+  --subnet=172.16.1.0/24 \
+  --ip-range=172.16.1.0/24 \
+  --gateway=172.16.1.1 \
+  vps
+
+# 支持 IPv6
+docker network create \
+  --driver=bridge \
+  --ipv6 \
+  --subnet=172.16.1.0/24 \
+  --ip-range=172.16.1.0/24 \
+  --gateway=172.16.1.1 \
+  --subnet=2001:0DB8::1:0/112 \
+  --ip-range2001:0DB8::1:0/112 \
+  --gateway=2001:db8::1:1 \
+  vps
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/Kpxd16d2I/" class="tag">
+                    Linux
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://cainiao1992.github.io/post/speedtest/">
+                  <h3 class="post-title">
+                    网速测试
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>网速测试 | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="SPEEDTEST CLI 网速测试
+macOS
+brew tap teamookla/speedtest
+brew update
+# Example how to remove conflicting or old versions us..." />
+    <meta name="keywords" content="Linux,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">网速测试</h2>
+            <div class="post-date">2023-08-17</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="speedtest-cli-网速测试">SPEEDTEST CLI 网速测试</h2>
+<h3 id="macos">macOS</h3>
+<pre><code class="language-bash">brew tap teamookla/speedtest
+brew update
+# Example how to remove conflicting or old versions using brew
+# brew uninstall speedtest --force
+# brew uninstall speedtest-cli --force
+brew install speedtest --force
+</code></pre>
+<h3 id="ubuntudebian">Ubuntu/Debian</h3>
+<pre><code class="language-bash">## If migrating from prior bintray install instructions please first...
+# sudo rm /etc/apt/sources.list.d/speedtest.list
+# sudo apt-get update
+# sudo apt-get remove speedtest
+## Other non-official binaries will conflict with Speedtest CLI
+# Example how to remove using apt-get
+# sudo apt-get remove speedtest-cli
+sudo apt-get update
+sudo apt-get install -y curl
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+sudo apt-get install -y speedtest
+</code></pre>
+<h3 id="fedoracentosredhat">Fedora/Centos/Redhat</h3>
+<pre><code class="language-bash">## If migrating from prior bintray install instructions please first...
+# sudo rm /etc/yum.repos.d/bintray-ookla-rhel.repo
+# sudo yum remove speedtest
+## Other non-official binaries will conflict with Speedtest CLI
+# Example how to remove using yum
+# rpm -qa | grep speedtest | xargs -I {} sudo yum -y remove {}
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.rpm.sh | sudo bash
+sudo yum install speedtest
+</code></pre>
+<h3 id="本地到服务器测试">本地到服务器测试</h3>
+<pre><code class="language-bash">docker run -d --name looking-glass --restart always -p 8888:80 wikihostinc/looking-glass-server
+# 本地浏览器访问 http://IP:8888
+
+# 测试结束后
+docker stop looking-glass
+docker rm looking-glass
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/Kpxd16d2I/" class="tag">
+                    Linux
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://cainiao1992.github.io/post/kubernetes-note/">
+                  <h3 class="post-title">
+                    Kubernetes 笔记
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>卸载云服务监控 | 菜鸟的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://cainiao1992.github.io/favicon.ico?v=1700885120829">
+<link rel="stylesheet" href="https://cainiao1992.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="AliYun
+# 卸载云盾（安骑士）
+curl http://update.aegis.aliyun.com/download/uninstall.sh | bash
+curl http://update.aegis.aliyun.com/..." />
+    <meta name="keywords" content="Linux,笔记" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://cainiao1992.github.io">
+        <img src="https://cainiao1992.github.io/images/avatar.png?v=1700885120829" class="site-logo">
+        <h1 class="site-title">菜鸟的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://cainiao1992.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">卸载云服务监控</h2>
+            <div class="post-date">2023-08-17</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="aliyun">AliYun</h2>
+<pre><code class="language-bash"># 卸载云盾（安骑士）
+curl http://update.aegis.aliyun.com/download/uninstall.sh | bash
+curl http://update.aegis.aliyun.com/download/quartz_uninstall.sh | bash
+
+sudo rm -r /usr/local/aegis
+sudo systemctl disable aliyun.service
+sudo rm /usr/sbin/aliyun-service
+sudo rm /usr/sbin/aliyun-service.backup
+sudo rm /usr/sbin/aliyun_installer
+sudo rm /etc/systemd/system/aliyun.service
+sudo rm /lib/systemd/system/aliyun.service
+
+# 卸载云助手Agent
+/usr/local/share/assist-daemon/assist_daemon --stop
+/usr/local/share/assist-daemon/assist_daemon --delete
+rm -rf /usr/local/share/assist-daemon
+
+systemctl stop aliyun.service
+apt remove  aliyun-assist -y
+dpkg -l |grep &quot;^rc&quot;|awk '{print $2}'|sudo xargs apt -y purge
+rm -rf /usr/local/share/aliyun-assist
+</code></pre>
+<blockquote>
+<p>云监控</p>
+</blockquote>
+<pre><code class="language-bash"># 卸载云监控 Go 语言版
+# 停止
+/usr/local/cloudmonitor/CmsGoAgent.linux-* stop
+# 从系统服务中移除
+/usr/local/cloudmonitor/CmsGoAgent.linux-* uninstall
+
+# 卸载
+/usr/local/cloudmonitor/CmsGoAgent.linux-* stop &amp;&amp; \
+/usr/local/cloudmonitor/CmsGoAgent.linux-* uninstall &amp;&amp; \
+rm -rf /usr/local/cloudmonitor
+
+# 卸载云监控 Java 版
+# 停止
+/usr/local/cloudmonitor/wrapper/bin/cloudmonitor.sh stop
+
+# 卸载
+/usr/local/cloudmonitor/wrapper/bin/cloudmonitor.sh remove &amp;&amp; \
+rm -rf /usr/local/cloudmonitor
+</code></pre>
+<h2 id="qcloud">QCloud</h2>
+<pre><code class="language-bash">/usr/local/qcloud/stargate/admin/stop.sh
+/usr/local/qcloud/YunJing/stopYDCore.sh
+/usr/local/qcloud/monitor/barad/admin/stop.sh
+
+/usr/local/qcloud/stargate/admin/uninstall.sh
+/usr/local/qcloud/YunJing/uninst.sh
+/usr/local/qcloud/monitor/barad/admin/uninstall.sh
+rm -rf /usr/local/qcloud
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://cainiao1992.github.io/tag/Kpxd16d2I/" class="tag">
+                    Linux
+                  </a>
+                
+                  <a href="https://cainiao1992.github.io/tag/TC9QunWVT-/" class="tag">
+                    笔记
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://cainiao1992.github.io/post/initialize-the-vps/">
+                  <h3 class="post-title">
+                    初始化 VPS
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>
